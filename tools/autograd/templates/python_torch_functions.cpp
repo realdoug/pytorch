@@ -281,7 +281,7 @@ static PyTypeObject THPVariableFunctions = {
   0,                                     /* tp_members */
   0,                                     /* tp_getset */
   0,                                     /* tp_base */
-  0,                                     /* tp_dict */
+  PyDict_New(),                          /* tp_dict */
   0,                                     /* tp_descr_get */
   0,                                     /* tp_descr_set */
   0,                                     /* tp_dictoffset */
@@ -294,6 +294,7 @@ void initTorchFunctions(PyObject* module) {
   if (PyType_Ready(&THPVariableFunctions) < 0) {
     throw python_error();
   }
+  PyDict_SetItemString(THPVariableFunctions.tp_dict, "__cppfile__", PyUnicode_FromString(__FILE__));
   Py_INCREF(&THPVariableFunctions);
   if (PyModule_AddObject(module, "_VariableFunctions", (PyObject*)&THPVariableFunctions) < 0) {
     throw python_error();
