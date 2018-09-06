@@ -760,6 +760,32 @@ class TestSparse(TestCase):
             self.assertEqual(out._sparseDims(), len(shape))
             self.assertEqual(out._denseDims(), 0)
 
+    def test_narrow(self):
+        if self.is_cuda:
+            input = torch.cuda.sparse.DoubleTensor(
+                torch.LongTensor([[0], [1], [2]]).transpose(1, 0).cuda(),
+                torch.FloatTensor([3, 4, 5]).cuda(),
+                torch.Size([3]))
+        else:
+            input = torch.sparse.DoubleTensor(
+                torch.LongTensor([[0], [1], [2]]).transpose(1, 0),
+                torch.FloatTensor([3, 4, 5]),
+                torch.Size([3]))
+
+        narrow_args = [0,0,2] # dim, start, length
+        expected = torch.tensor([3., 4., 5.]).narrow(*narrow_args)
+
+        self.assertEqual(expected, input.narrow(*narrow_args).to_dense())
+        self.assertEqual(expected, input.coalesce().narrow(*narrow_args).to_dense())
+        
+        uncoalesced = torch.sparse.DoubleTensor(
+            torch.LongTensor([[0], [1], [2], [0], [1], [2]]).transpose(1, 0),
+            torch.FloatTensor([2, 3, 4, 1, 1, 1]),
+            torch.Size([3]))
+    
+        self.assertEqual(expected, uncoalesced.narrow(*narrow_args).to_dense())
+        self.assertEqual(expected, uncoalesced.coalesce().narrow(*narrow_args).to_dense())
+
     @skipIfRocm
     def test_log1p(self):
         if self.is_cuda:

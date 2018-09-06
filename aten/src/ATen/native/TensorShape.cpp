@@ -148,8 +148,48 @@ Tensor &as_strided_(Tensor& self, IntList size, IntList stride) {
   return at::as_strided_(self, size, stride, self.storage_offset());
 }
 
+Tensor _narrow_sparse(const Tensor& self, int64_t dim, int64_t start, int64_t length){
+  LongTensor indices = self._indices();
+  Tensor values = self._values();
+  int64_t numCoords = indices.size(1);
+  int64_t dims = indices.size(0);
+  
+  std::vector<int64_t> newSizes = self.sizes().vec();
+  newSizes[dim]=length;
+  
+  Tensor narrowDim = at::zeros_like(indices[dim]);
+  narrowDim.copy_(indices[dim]);
+  indices[dim] = indices[dim].add(-start);
+
+  std::vector<int64_t> keep;
+  int64_t end = start+length;
+  for(int i=0; i<numCoords; i++){
+    int64_t val = narrowDim[i].toCLong();
+    if(val >= start && val < end) 
+      keep.push_back(i);
+  }
+
+  int64_t keepSize = keep.size();
+  LongTensor newIndices_tmp = indices.type().tensor({keepSize, dims});
+  Tensor newValues = values.type().tensor({keepSize});
+  LongTensor tpose = indices.t();
+
+  int i=0;
+  for(int64_t& k : keep){
+    newIndices_tmp[i] = tpose[k];
+    newValues[i] = values[k];
+    i++;
+  }
+
+  LongTensor newIndices = newIndices_tmp.t();
+  return self.type().sparse_coo_tensor(newIndices, newValues, newSizes);
+}
+
 Tensor narrow(const Tensor& self, int64_t dim, int64_t start, int64_t length) {
   AT_CHECK(self.dim() > 0, "narrow() cannot be applied to a 0-dim tensor.");
+  if (self.type().is_sparse()) {
+    return _narrow_sparse(self, dim, start, length);
+  }
   auto cur_size = self.size(dim);
   if (start != cur_size) {  // start being the end is valid, but not a valid dim specification.
     start = maybe_wrap_dim(start, cur_size);
