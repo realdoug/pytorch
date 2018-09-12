@@ -1426,6 +1426,14 @@ Example::
             [ 8,  9]])
 """)
 
+add_docstr_all('narrow_copy',
+               r"""
+narrow(dimension, start, length) -> Tensor
+
+Same functionality as :meth:`Tensor.narrow` except returning a full copy,
+instead of shared storage.
+""")
+
 add_docstr_all('ndimension',
                r"""
 ndimension() -> int
