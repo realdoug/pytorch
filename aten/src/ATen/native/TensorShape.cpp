@@ -159,16 +159,14 @@ Tensor narrow_copy(const Tensor& self, int64_t dim, int64_t start, int64_t lengt
     std::vector<int64_t> newSizes = self.sizes().vec();
     newSizes[dim]=length;
     
-    Tensor narrowDim = at::zeros_like(indices[dim]);
-    narrowDim.copy_(indices[dim]);
-    Tensor mask = (narrowDim >= start).__and__((narrowDim < end));
-    
-    indices[dim] = indices[dim].add(-start);
+    Tensor mask = (indices[dim] >= start).__and__((indices[dim] < end));
     Tensor newValues = self._values().masked_select(mask);
     Tensor newIndices = indices.masked_select(mask).view({dims, -1});
+    newIndices[dim].add_(-start);
+    
     return self.type().sparse_coo_tensor(newIndices, newValues, newSizes);
   }else{
-    return self.clone().narrow(dim,start,length);
+    return self.narrow(dim,start,length).clone();
   }
 }
 
