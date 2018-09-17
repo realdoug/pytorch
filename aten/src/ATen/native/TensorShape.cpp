@@ -152,18 +152,27 @@ Tensor narrow_copy(const Tensor& self, int64_t dim, int64_t start, int64_t lengt
   if (self.type().is_sparse()) {
     AT_CHECK(self.dim() > 0, "narrow() cannot be applied to a 0-dim tensor.");
     LongTensor indices = self._indices();
-    int64_t nnz = indices.size(1);
     int64_t dims = indices.size(0);
+    int64_t sparseDims = self._sparseDims();
     int64_t end = start+length;
     
     std::vector<int64_t> newSizes = self.sizes().vec();
     newSizes[dim]=length;
     
-    Tensor mask = (indices[dim] >= start).__and__((indices[dim] < end));
-    Tensor newValues = self._values().masked_select(mask);
-    Tensor newIndices = indices.masked_select(mask).view({dims, -1});
-    newIndices[dim].add_(-start);
-    
+    Tensor newValues;
+    LongTensor newIndices;
+    if(dim < sparseDims){
+      Tensor mask = (indices[dim] >= start).__and__((indices[dim] < end));
+      newIndices = indices.masked_select(mask).view({dims, -1});
+      newIndices[dim].add_(-start);
+      Tensor nzIndices = mask.nonzero().view(-1);
+      newValues = self._values().index_select(0, nzIndices);
+    }else{
+      newIndices = indices;
+      int64_t ddim = dim-sparseDims+1;
+      newValues = self._values().narrow_copy(ddim,start,length);
+    }
+   
     return self.type().sparse_coo_tensor(newIndices, newValues, newSizes);
   }else{
     return self.narrow(dim,start,length).clone();
