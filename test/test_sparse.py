@@ -786,6 +786,37 @@ class TestSparse(TestCase):
         self.assertEqual(expected, uncoalesced.narrow_copy(*narrow_args).to_dense())
         self.assertEqual(expected, uncoalesced.coalesce().narrow_copy(*narrow_args).to_dense())
 
+    def test_narrow_hybrid(self):
+        if self.is_cuda:
+            input = torch.cuda.sparse.DoubleTensor(
+                torch.LongTensor([[0,2,0], [0,2,1]]).cuda(),
+                torch.FloatTensor([[1,2],[3,4],[5,6]]).cuda(),
+                torch.Size([3,3,2]))
+        else:
+            input = torch.sparse.DoubleTensor(
+                torch.LongTensor([[0,2,0], [0,2,1]]),
+                torch.FloatTensor([[1,2],[3,4],[5,6]]),
+                torch.Size([3,3,2]))
+
+        dense = torch.DoubleTensor([[[1., 2.],
+                                     [5., 6.],
+                                     [0., 0.]],
+
+                                     [[0., 0.],
+                                     [0., 0.],
+                                     [0., 0.]],
+
+                                     [[0., 0.],
+                                     [0., 0.],
+                                     [3., 4.]]])
+        narrow_args = [0, 0, 2]  # dim, start, length
+        expected = dense.narrow(*narrow_args)
+        self.assertEqual(expected, input.narrow_copy(*narrow_args).to_dense())
+
+        narrow_args = [2, 1, 1]
+        expected = dense.narrow(*narrow_args)
+        self.assertEqual(expected, input.narrow_copy(*narrow_args).to_dense())
+
     @skipIfRocm
     def test_log1p(self):
         if self.is_cuda:
