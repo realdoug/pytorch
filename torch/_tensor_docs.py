@@ -1431,8 +1431,8 @@ add_docstr_all('narrow_copy',
                r"""
 narrow_copy(dimension, start, length) -> Tensor
 
-Same functionality as :meth:`Tensor.narrow` except returning a copy
-rather than shared storage.
+Same as :meth:`Tensor.narrow` except returning a copy rather
+than shared storage.
 """)
 
 add_docstr_all('ndimension',
