@@ -1188,6 +1188,9 @@
 - func: mvlgamma_(Tensor self, int64_t p) -> Tensor
   variants: method
 
+- func: my_op(Tensor self) -> Tensor
+  variants: method
+
 - func: narrow(Tensor self, int64_t dim, int64_t start, int64_t length) -> Tensor
   variants: function, method
 

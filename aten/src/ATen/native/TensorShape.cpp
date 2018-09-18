@@ -148,6 +148,13 @@ Tensor &as_strided_(Tensor& self, IntList size, IntList stride) {
   return at::as_strided_(self, size, stride, self.storage_offset());
 }
 
+Tensor my_op(const Tensor& self) {
+  if(self.is_sparse()){
+    printf("%ld\n", self._sparseDims()); // prints "2"
+    printf("%lld\n", _get_sparse_impl(self)->sparseDims()); // prints "140495002593472" on CPU; segfault on CUDA
+  }
+}
+
 Tensor narrow(const Tensor& self, int64_t dim, int64_t start, int64_t length) {
   AT_CHECK(self.dim() > 0, "narrow() cannot be applied to a 0-dim tensor.");
   auto cur_size = self.size(dim);
