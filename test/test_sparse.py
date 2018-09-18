@@ -761,16 +761,10 @@ class TestSparse(TestCase):
             self.assertEqual(out._denseDims(), 0)
 
     def test_narrow(self):
-        if self.is_cuda:
-            input = torch.cuda.sparse.DoubleTensor(
-                torch.LongTensor([[0], [1], [2]]).transpose(1, 0).cuda(),
-                torch.FloatTensor([3, 4, 5]).cuda(),
-                torch.Size([3]))
-        else:
-            input = torch.sparse.DoubleTensor(
-                torch.LongTensor([[0], [1], [2]]).transpose(1, 0),
-                torch.FloatTensor([3, 4, 5]),
-                torch.Size([3]))
+        input = self.SparseTensor(
+            self.IndexTensor([[0], [1], [2]]).transpose(1, 0),
+            self.ValueTensor([3, 4, 5]),
+            torch.Size([3]))
 
         narrow_args = [0, 0, 2]  # dim, start, length
         expected = torch.tensor([3., 4., 5.]).narrow(*narrow_args)
@@ -778,25 +772,19 @@ class TestSparse(TestCase):
         self.assertEqual(expected, input.narrow_copy(*narrow_args).to_dense())
         self.assertEqual(expected, input.coalesce().narrow_copy(*narrow_args).to_dense())
 
-        uncoalesced = torch.sparse.DoubleTensor(
-            torch.LongTensor([[0], [1], [2], [0], [1], [2]]).transpose(1, 0),
-            torch.FloatTensor([2, 3, 4, 1, 1, 1]),
+        uncoalesced = self.SparseTensor(
+            self.IndexTensor([[0], [1], [2], [0], [1], [2]]).transpose(1, 0),
+            self.ValueTensor([2, 3, 4, 1, 1, 1]),
             torch.Size([3]))
 
         self.assertEqual(expected, uncoalesced.narrow_copy(*narrow_args).to_dense())
         self.assertEqual(expected, uncoalesced.coalesce().narrow_copy(*narrow_args).to_dense())
 
     def test_narrow_hybrid(self):
-        if self.is_cuda:
-            input = torch.cuda.sparse.DoubleTensor(
-                torch.LongTensor([[0,2,0], [0,2,1]]).cuda(),
-                torch.FloatTensor([[1,2],[3,4],[5,6]]).cuda(),
-                torch.Size([3,3,2]))
-        else:
-            input = torch.sparse.DoubleTensor(
-                torch.LongTensor([[0,2,0], [0,2,1]]),
-                torch.FloatTensor([[1,2],[3,4],[5,6]]),
-                torch.Size([3,3,2]))
+        input = self.SparseTensor(
+            self.IndexTensor([[0,2,0], [0,2,1]]),
+            self.ValueTensor([[1,2],[3,4],[5,6]]),
+            torch.Size([3,3,2]))
 
         dense = torch.DoubleTensor([[[1., 2.],
                                      [5., 6.],

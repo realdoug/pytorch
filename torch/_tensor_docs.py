@@ -1432,7 +1432,8 @@ add_docstr_all('narrow_copy',
 narrow_copy(dimension, start, length) -> Tensor
 
 Same as :meth:`Tensor.narrow` except returning a copy rather
-than shared storage.
+than shared storage.  This is primarily for sparse tensors, which 
+do not have a shared-storage narrow method.
 """)
 
 add_docstr_all('ndimension',
