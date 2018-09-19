@@ -503,6 +503,7 @@ struct AT_API Type {
   virtual Tensor mv(const Tensor & self, const Tensor & vec) const = 0;
   virtual Tensor mvlgamma(const Tensor & self, int64_t p) const = 0;
   virtual Tensor & mvlgamma_(Tensor & self, int64_t p) const = 0;
+  virtual Tensor narrow_copy(const Tensor & self, int64_t dim, int64_t start, int64_t length) const = 0;
   virtual Tensor narrow(const Tensor & self, int64_t dim, int64_t start, int64_t length) const = 0;
   AT_DEPRECATED(virtual Tensor ones(IntList size) const = 0);
   virtual Tensor permute(const Tensor & self, IntList dims) const = 0;
