@@ -1202,6 +1202,12 @@ inline std::vector<Tensor> Tensor::unbind(int64_t dim) const {
 inline int64_t Tensor::get_device() const {
     return type().get_device(*this);
 }
+inline Tensor Tensor::to_sparse(int64_t sparseDims) const {
+    return type().to_sparse(*this, sparseDims);
+}
+inline Tensor Tensor::to_sparse() const {
+    return type().to_sparse(*this);
+}
 inline Tensor Tensor::to(Device device, ScalarType dtype, bool non_blocking) const {
     return type().to(*this, device, dtype, non_blocking);
 }

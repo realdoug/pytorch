@@ -236,6 +236,35 @@ SparseTensor& resize_as_sparse_(SparseTensor& self, const SparseTensor& src) {
   return self;
 }
 
+SparseTensor dense_to_sparse(const Tensor& self){
+  return dense_to_sparse(self, self.dim());
+}
+
+SparseTensor dense_to_sparse(const Tensor& self, int64_t sparseDims){
+  int64_t dims = self.dim();
+  AT_CHECK(sparseDims > 0, "sparseDims must be >0");
+  AT_CHECK(sparseDims <= dims, 
+    "sparseDims must be less than or equal to self.dim()");
+  at::TensorOptions spO = self.type().toSparse().options();
+  std::vector<int64_t> sizes = self.sizes().vec();
+
+  LongTensor indices;
+  if(sparseDims == dims){
+    indices = self.nonzero();
+  }else{
+    Tensor i = self.nonzero().narrow(1, 0, sparseDims);
+    std::tie(indices, std::ignore) = _unique_dim(i, 0);
+  }
+  indices.transpose_(0,1);
+
+  std::vector<Tensor> ix = indices.chunk(indices.size(0), 0);
+  Tensor values = self.index(ix).squeeze_(0);
+
+  Tensor sparse = at::sparse_coo_tensor(indices, values, sizes, spO);
+  _get_sparse_impl(sparse)->set_coalesced(true);
+  return sparse;
+}
+
 // NB: Dropped the resizeNd variants
 
 Tensor sparse_to_dense(const SparseTensor& self) {

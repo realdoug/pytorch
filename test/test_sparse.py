@@ -255,6 +255,19 @@ class TestSparse(TestCase):
         res = self.ValueTensor(3, 4, 5, 0)
         test_tensor(x, res)
 
+    def test_to_sparse(self):
+        shape = [10, 5, 19, 8]
+        for dim, dim_sz in enumerate(shape):
+            sparse_dims = dim + 1
+            expected, _, _ = self._gen_sparse(sparse_dims, int(dim_sz / 3), shape)
+            d = expected.to_dense()
+            result = d.to_sparse(sparse_dims)
+            self.assertEqual(expected.to_dense(), result.to_dense())  # == not implemented for sparse tensors yet
+            self.assertEqual(sparse_dims, result._sparseDims())
+
+        sp, _, _ = self._gen_sparse(2, 10, [3, 3, 3])
+        self.assertRaises(RuntimeError, lambda: sp.to_sparse())
+
     @skipIfRocm
     def test_shared(self):
         i = self.IndexTensor([[2]])

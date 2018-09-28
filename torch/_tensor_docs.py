@@ -2384,6 +2384,14 @@ Examples::
     0.012766935862600803
 """)
 
+add_docstr_all('to_sparse',
+               r"""
+to_sparse() -> Tensor
+
+Returns a sparse copy of the tensor.  Torch supports sparse tensors in
+:ref:`coordinate format <sparse-docs>`.
+""")
+
 add_docstr_all('topk',
                r"""
 topk(k, dim=None, largest=True, sorted=True) -> (Tensor, LongTensor)

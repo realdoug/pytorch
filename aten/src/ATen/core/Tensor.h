@@ -633,6 +633,8 @@ public:
   int64_t numel() const;
   std::vector<Tensor> unbind(int64_t dim=0) const;
   int64_t get_device() const;
+  Tensor to_sparse(int64_t sparseDims) const;
+  Tensor to_sparse() const;
   Tensor to(Device device, ScalarType dtype, bool non_blocking=false) const;
   Tensor to(ScalarType dtype, bool non_blocking=false) const;
   Tensor to(Device device, bool non_blocking=false) const;
