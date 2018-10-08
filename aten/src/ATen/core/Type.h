@@ -592,6 +592,7 @@ struct CAFFE2_API Type {
   virtual int64_t numel(const Tensor & self) const = 0;
   virtual std::vector<Tensor> unbind(const Tensor & self, int64_t dim) const = 0;
   virtual int64_t get_device(const Tensor & self) const = 0;
+  virtual Tensor my_new_func(const Tensor & self) const = 0;
   virtual Tensor to(const Tensor & self, Device device, ScalarType dtype, bool non_blocking) const = 0;
   virtual Tensor to(const Tensor & self, ScalarType dtype, bool non_blocking) const = 0;
   virtual Tensor to(const Tensor & self, Device device, bool non_blocking) const = 0;

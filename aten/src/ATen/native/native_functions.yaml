@@ -2090,6 +2090,12 @@
   variants: function, method
   device_guard: False
 
+- func: my_new_func(Tensor self) -> Tensor
+  variants: method
+  dispatch:
+    CPU: my_new_func
+    CUDA: my_new_func
+
 - func: to(Tensor self, Device device, ScalarType dtype, bool non_blocking=false) -> Tensor
   variants: method
   device_guard: False
