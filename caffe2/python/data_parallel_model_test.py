@@ -859,7 +859,7 @@ class RecurrentNetworkParallelTest(TestCase):
         total batchsize, independent of number of GPUs/CPUs.
         '''
         for gpu in [True, False]:
-            if gpu and not workspace.has_gpu_support:
+            if gpu and (not workspace.has_gpu_support or workspace.NumCudaDevices() < 2):
                 continue
             result_2gpus = self.run_model([0, 1], gpu)
             result_1gpus = self.run_model([0], gpu)
